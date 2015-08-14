@@ -11,7 +11,7 @@ import isEmpty from 'ember-metal/is_empty';
   Ember.isBlank([]);              // true
   Ember.isBlank('\n\t');          // true
   Ember.isBlank('  ');            // true
-  Ember.isBlank({});              // false
+  Ember.isBlank({});              // true
   Ember.isBlank('\n\t Hello');    // false
   Ember.isBlank('Hello world');   // false
   Ember.isBlank([1,2,3]);         // false

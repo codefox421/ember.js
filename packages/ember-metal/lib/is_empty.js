@@ -3,10 +3,10 @@ import isNone from 'ember-metal/is_none';
 
 /**
   Verifies that a value is `null` or an empty string, empty array,
-  or empty function.
+  empty object, or empty function.
 
   Constrains the rules on `Ember.isNone` by returning true for empty
-  string and empty arrays.
+  strings, empty objects, and empty arrays.
 
   ```javascript
   Ember.isEmpty();                // true
@@ -14,7 +14,7 @@ import isNone from 'ember-metal/is_none';
   Ember.isEmpty(undefined);       // true
   Ember.isEmpty('');              // true
   Ember.isEmpty([]);              // true
-  Ember.isEmpty({});              // false
+  Ember.isEmpty({});              // true
   Ember.isEmpty('Adam Hawkins');  // false
   Ember.isEmpty([0,1,2]);         // false
   ```
@@ -53,6 +53,12 @@ function isEmpty(obj) {
     if (typeof length === 'number') {
       return !length;
     }
+    for (var key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   return false;
