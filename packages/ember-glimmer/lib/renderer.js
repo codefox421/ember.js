@@ -26,13 +26,13 @@ class Scheduler {
   destroy() {
     if (this._roots.length) {
       this._roots.splice(0, this._roots.length);
-      run.backburner.off('begin', this._scheduleMaybeUpdate);
+      run._off('begin', this._scheduleMaybeUpdate);
     }
   }
 
   registerView(view) {
     if (!this._roots.length) {
-      run.backburner.on('begin', this._scheduleMaybeUpdate);
+      run._on('begin', this._scheduleMaybeUpdate);
     }
     this._roots.push(view);
   }
@@ -42,7 +42,7 @@ class Scheduler {
     if (~viewIndex) {
       this._roots.splice(viewIndex, 1);
       if (!this._roots.length) {
-        run.backburner.off('begin', this._scheduleMaybeUpdate);
+        run._off('begin', this._scheduleMaybeUpdate);
       }
     }
   }

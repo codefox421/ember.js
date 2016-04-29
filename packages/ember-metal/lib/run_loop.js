@@ -683,3 +683,55 @@ run._addQueue = function(name, after) {
     run.queues.splice(run.queues.indexOf(after) + 1, 0, name);
   }
 };
+
+run._eventCallbacks = {};
+
+function bindEventName(eventName) {
+  return function trigger(arg1, arg2) {
+    let callbacks = run._eventCallbacks[eventName];
+    if (callbacks) {
+      for (let i = 0; i < callbacks.length; ++i) {
+        callbacks[i](arg1, arg2);
+      }
+    }
+  };
+}
+
+for (let eventName in backburner._eventCallbacks) {
+  if (backburner._eventCallbacks.hasOwnProperty(eventName)) {
+    run._eventCallbacks[eventName] = [];
+    backburner.on(eventName, bindEventName(eventName));
+  }
+}
+
+run._on = function(eventName, callback) {
+  if (typeof callback !== 'function') {
+    throw new TypeError('Callback must be a function');
+  }
+  let callbacks = this._eventCallbacks[eventName];
+  if (callbacks) {
+    callbacks.push(callback);
+  } else {
+    throw new TypeError(`Cannot add callback to "${eventName}" because that event does not exist`);
+  }
+};
+
+run._off = function(eventName, callback) {
+  let callbacks = this._eventCallbacks[eventName];
+  if (callbacks) {
+    let callbackFound = false;
+    if (callback) {
+      for (let i = callbacks.length - 1; i > -1; --i) {
+        if (callbacks[i] === callback) {
+          callbackFound = true;
+          callbacks.splice(i, 1);
+        }
+      }
+    }
+    if (!callbackFound) {
+      throw new TypeError('Cannot remove a callback that does not exist');
+    }
+  } else {
+    throw new TypeError(`Cannot remove callback to "${eventName} because that event does not exist`);
+  }
+};
