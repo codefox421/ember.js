@@ -1,6 +1,7 @@
 import { meta as metaFor } from './meta';
 import require, { has } from 'require';
 import run from './run_loop';
+import { schedulerRegistrar } from 'ember-glimmer/renderer';
 
 let hasGlimmer = has('glimmer-reference');
 let CONSTANT_TAG, CURRENT_TAG, DirtyableTag, makeTag;
@@ -22,7 +23,7 @@ export function tagFor(object, _meta) {
 
 function K() {}
 function ensureRunloop() {
-  if (run._eventCallbacks.begin.length && !run.backburner.currentInstance) {
+  if (schedulerRegistrar.hasRegistrations() && !run.backburner.currentInstance) {
     run.schedule('actions', K);
   }
 }
