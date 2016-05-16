@@ -1,8 +1,8 @@
 import { meta as metaFor } from './meta';
 import require, { has } from 'require';
 import run from './run_loop';
-import { schedulerRegistrar } from 'ember-glimmer/renderer';
 
+const { backburner } = run;
 let hasGlimmer = has('glimmer-reference');
 let CONSTANT_TAG, CURRENT_TAG, DirtyableTag, makeTag;
 
@@ -20,6 +20,36 @@ export function tagFor(object, _meta) {
     return CONSTANT_TAG;
   }
 }
+
+class SchedulerRegistrar {
+  constructor() {
+    let schedulerRegistrar = this;
+    this._eventCallbacks = {
+      begin: []
+    };
+
+    this._trigger = backburner._trigger;
+    this.register = backburner.on;
+    this.deregister = backburner.off;
+
+    function bindEventName(eventName) {
+      return function trigger(arg1, arg2) {
+        schedulerRegistrar._trigger(eventName, arg1, arg2);
+      };
+    }
+
+    for (let eventName in this._eventCallbacks) {
+      if (backburner._eventCallbacks.hasOwnProperty(eventName)) {
+        backburner.on(eventName, bindEventName(eventName));
+      }
+    }
+  }
+
+  hasRegistrations() {
+    return !!this._eventCallbacks.length;
+  }
+}
+export const schedulerRegistrar = new SchedulerRegistrar();
 
 function K() {}
 function ensureRunloop() {
