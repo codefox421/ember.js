@@ -1,7 +1,8 @@
 import { RootReference } from './utils/references';
 import run from 'ember-metal/run_loop';
-import { schedulerRegistrar } from 'ember-metal/tags';
 import { CURRENT_TAG } from 'glimmer-reference';
+
+const { backburner } = run;
 
 class DynamicScope {
   constructor({ view, controller, outletState, isTopLevel }) {
@@ -15,6 +16,36 @@ class DynamicScope {
     return new DynamicScope(this);
   }
 }
+
+class SchedulerRegistrar {
+  constructor() {
+    let schedulerRegistrar = this;
+    this._eventCallbacks = {
+      begin: []
+    };
+
+    this._trigger = backburner._trigger;
+    this.register = backburner.on;
+    this.deregister = backburner.off;
+
+    function bindEventName(eventName) {
+      return function trigger(arg1, arg2) {
+        schedulerRegistrar._trigger(eventName, arg1, arg2);
+      };
+    }
+
+    for (let eventName in this._eventCallbacks) {
+      if (backburner._eventCallbacks.hasOwnProperty(eventName)) {
+        backburner.on(eventName, bindEventName(eventName));
+      }
+    }
+  }
+
+  hasRegistrations() {
+    return !!this._eventCallbacks.length;
+  }
+}
+export const schedulerRegistrar = new SchedulerRegistrar();
 
 class Scheduler {
   constructor() {
