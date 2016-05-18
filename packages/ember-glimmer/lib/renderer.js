@@ -17,6 +17,7 @@ class DynamicScope {
   }
 }
 
+
 class SchedulerRegistrar {
   constructor() {
     this.callback = null;
